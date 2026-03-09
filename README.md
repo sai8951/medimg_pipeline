@@ -1,4 +1,4 @@
-# medimg-pipeline
+# [WIP] medimg-pipeline
 
 Lightweight **YAML-configured CLI** for reproducible **3D medical image inference pipelines**.
 
