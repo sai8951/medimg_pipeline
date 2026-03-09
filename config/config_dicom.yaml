@@ -1,0 +1,31 @@
+input:
+  type: dicom
+  path: ./dataset
+
+output:
+  dir: ./results
+  save_mask: true
+  save_overlay: true
+
+preprocess:
+  orientation: RAS
+  resample_spacing: [1.0, 1.0, 1.0]
+  intensity_clip: [-1000, 1000]
+  normalize: zscore
+
+model:
+  type: dummy # pytorch
+  weights: null # ./weights/model.pt
+  device: auto  # cpu, cuda, mps, auto
+
+inference:
+  mode: full_volume
+  batch_size: 1
+
+postprocess:
+  threshold: 0.5
+  keep_largest_component: false
+
+export:
+  mask_format: nifti
+  summary_csv: true

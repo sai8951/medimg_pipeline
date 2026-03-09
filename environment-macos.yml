@@ -1,0 +1,22 @@
+name: med-pipe
+
+channels:
+  - pytorch
+  - conda-forge
+
+dependencies:
+  - python=3.10
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - nibabel
+  - simpleitk
+  - pytorch
+  - torchvision
+  - monai
+  - pip
+  - pip:
+      - typer
+      - pydantic
+      - pyyaml
