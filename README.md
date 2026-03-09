@@ -1,6 +1,8 @@
 # medimg_pipeline
 YAML-configured CLI for reproducible 3D medical image inference pipelines with NIfTI and DICOM support.
 
+**Keywords:** medical imaging, DICOM, NIfTI, deep learning, segmentation, volumetric data
+
 - **medimg_pipeline** is a lightweight CLI tool for running reproducible 3D medical image inference pipelines using YAML configuration.
 - It supports both **NIfTI** and **DICOM** inputs, standardized preprocessing, model inference, and export of segmentation results and visualizations.
 - The tool is designed for researchers and engineers working with MRI, CT, or PET volumetric data who need clean and reproducible inference workflows.
