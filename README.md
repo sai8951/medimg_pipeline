@@ -1,39 +1,69 @@
-# [WIP] medimg_pipeline
-YAML-configured CLI for reproducible 3D medical image inference pipelines with NIfTI and DICOM support.
+# medimg-pipeline
 
-**Keywords:** medical imaging, DICOM, NIfTI, deep learning, segmentation, volumetric data
+Lightweight **YAML-configured CLI** for reproducible **3D medical image inference pipelines**.
 
-- **medimg_pipeline** is a lightweight CLI tool for running reproducible 3D medical image inference pipelines using YAML configuration.
-- It supports both **NIfTI** and **DICOM** inputs, standardized preprocessing, model inference, and export of segmentation results and visualizations.
-- The tool is designed for researchers and engineers working with MRI, CT, or PET volumetric data who need clean and reproducible inference workflows.
+Supports **NIfTI** and **DICOM** inputs with standardized preprocessing, model inference, and export of segmentation results.
 
-## TODO
-Put some example snapshots here.  
-MRI slice + segmentation mask overlay for example.
+**Keywords:** medical imaging · DICOM · NIfTI · deep learning · segmentation · volumetric data
+
+---
+
+## Overview
+
+**medimg-pipeline** is a lightweight CLI tool for running reproducible 3D medical image inference pipelines using YAML configuration.
+
+It supports:
+
+- **NIfTI** and **DICOM** input formats
+- standardized preprocessing
+- PyTorch-based model inference
+- segmentation export
+- visualization overlays
+- batch inference workflows
+
+The tool is designed for researchers and engineers working with **MRI, CT, or PET volumetric data** who need clean and reproducible inference workflows.
+
+---
+
+## Demo
+
+*(example images will be added here)*
+
+Example output:
+
+MRI slice + segmentation mask overlay.
 
 ## Installation (conda)
 
 Create environment
 
 ```bash
-git clone https://github.com/sai8951/medimg_pipeline
-cd medimg_pipeline
+git clone https://github.com/sai8951/medimg-pipeline
+cd medimg-pipeline
 conda env create -f environment.yml
 conda activate med-pipe
 pip install -e .
 ```
 
-## Quick Example
-Run an inference pipeline with a YAML configuration:
+## Quick Start
 
-### Dry Run
+
+### 1. Dry Run
 Inspect inputs and configuration before running inference:
 
 ```bash
 medimg-pipeline dry-run config/config_nifti.yaml
 ```
 
-### Batch inference
+Example output:
+
+```bash
+Found 2 input(s)
+[1] case001.nii.gz | shape=(128,256,256) | spacing=(1.0,1.0,1.0)
+[2] case002.nii.gz | shape=(128,256,256) | spacing=(1.0,1.0,1.0)
+```
+
+### 2. Batch inference
 
 ```bash
 medimg-pipeline run config/config_nifti.yaml
@@ -66,16 +96,19 @@ results/
 - Visualization overlays (PNG)
 - Batch inference support
 - Reproducible pipeline configuration
+- Dry-run input inspection
 
 ## Example Configuration
 
 ```yaml
 input:
-  type: dicom
-  path: ./data/case001
+  type: nifti
+  path: ./data
+  pattern: "*.nii.gz"
 
 output:
   dir: ./results
+  save_mask: true
   save_overlay: true
 
 preprocess:
@@ -86,13 +119,19 @@ preprocess:
 model:
   type: pytorch
   weights: ./weights/model.pt
-  device: cuda
+  device: auto  # cpu, cuda, mps, auto
 
 inference:
   mode: full_volume
+  batch_size: 1
 
 postprocess:
   threshold: 0.5
+  keep_largest_component: false
+
+export:
+  mask_format: nifti
+  summary_csv: true
 ```
 
 ## Supported Input Formats
@@ -111,7 +150,7 @@ Multi-series directories can be handled via configuration options.
 
 ## Intended Use
 
-This tool is intended for research and development workflows in medical image analysis, including:
+This tool is intended for research workflows in medical image analysis:
 - MRI segmentation
 - CT organ segmentation
 - PET/MRI analysis pipelines
