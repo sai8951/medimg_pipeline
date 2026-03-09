@@ -38,7 +38,7 @@ MRI slice + segmentation mask overlay.
 Create environment
 
 ```bash
-git clone https://github.com/sai8951/medimg-pipeline
+git clone git@github.com:sai8951/medimg-pipeline.git
 cd medimg-pipeline
 conda env create -f environment.yml
 conda activate med-pipe
