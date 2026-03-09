@@ -11,20 +11,49 @@ YAML-configured CLI for reproducible 3D medical image inference pipelines with N
 Put some example snapshots here.  
 MRI slice + segmentation mask overlay for example.
 
+## Installation (conda)
+
+Create environment
+
+```bash
+git clone https://github.com/sai8951/medimg_pipeline
+cd medimg_pipeline
+conda env create -f environment.yml
+conda activate med-pipe
+pip install -e .
+```
+
 ## Quick Example
 Run an inference pipeline with a YAML configuration:
 
+### Dry Run
+Inspect inputs and configuration before running inference:
+
 ```bash
-medimg-pipeline run config.yaml
+medimg-pipeline dry-run config/config_nifti.yaml
 ```
 
-Expected output:
+### Batch inference
+
+```bash
+medimg-pipeline run config/config_nifti.yaml
+```
+
+Input directory:
+
+```text
+data/
+    case001.nii.gz
+    case002.nii.gz
+```
+
+Output:
 
 ```text
 results/
-├── case001_mask.nii.gz
-├── case001_overlay.png
-└── summary.csv
+    case001_mask.nii.gz
+    case002_mask.nii.gz
+    summary.csv
 ```
 
 ## Features
@@ -64,20 +93,6 @@ inference:
 
 postprocess:
   threshold: 0.5
-```
-
-## Installation
-
-```bash
-pip install medimg-pipeline
-```
-
-or
-
-```bash
-git clone https://github.com/sai8951/medimg_pipeline
-cd medimg-pipeline
-pip install -e .
 ```
 
 ## Supported Input Formats

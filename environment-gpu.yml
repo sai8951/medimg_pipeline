@@ -1,0 +1,30 @@
+name: med-pipe-gpu
+
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+
+dependencies:
+  - python=3.10
+
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+
+  - nibabel
+  - simpleitk
+
+  - pytorch
+  - torchvision
+  - pytorch-cuda=12.1
+
+  - monai
+
+  - pip
+
+  - pip:
+      - typer
+      - pydantic
+      - pyyaml
