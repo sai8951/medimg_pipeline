@@ -8,12 +8,23 @@ Supports **NIfTI** and **DICOM** inputs with standardized preprocessing, model i
 
 ---
 
+## Why medimg-pipeline?
+
+Existing tools are often:
+- hard to reproduce
+- tightly coupled to specific models
+- difficult to configure
+
+medimg-pipeline provides:
+- simple YAML-based configuration
+- modular pipeline design
+- reproducible workflows
+
 ## Overview
 
 **medimg-pipeline** is a lightweight CLI tool for running reproducible 3D medical image inference pipelines using YAML configuration.
 
 It supports:
-
 - **NIfTI** and **DICOM** input formats
 - standardized preprocessing
 - PyTorch-based model inference
@@ -22,6 +33,15 @@ It supports:
 - batch inference workflows
 
 The tool is designed for researchers and engineers working with **MRI, CT, or PET volumetric data** who need clean and reproducible inference workflows.
+
+### Model Types
+
+- `dummy` (default): lightweight deterministic model for testing pipelines
+- `pytorch`: custom PyTorch models
+- `monai`: MONAI-based models (planned)
+- `nnunet`: nnU-Net models (planned)
+
+🔥 The design follows a **config-first approach**, enabling reproducible and shareable pipelines across datasets and environments.🔥
 
 ---
 
@@ -38,9 +58,9 @@ MRI slice + segmentation mask overlay.
 Create environment
 
 ```bash
-git clone https://github.com/sai8951/medimg-pipeline
+git clone git@github.com:sai8951/medimg-pipeline.git
 cd medimg-pipeline
-conda env create -f environment.yml
+conda env create -f environment.yml # choose environment.yml, environment-gpu.yml, or environment-macos.yml
 conda activate med-pipe
 pip install -e .
 ```
@@ -49,6 +69,7 @@ pip install -e .
 
 
 ### 1. Dry Run
+
 Inspect inputs and configuration before running inference:
 
 ```bash
@@ -62,6 +83,11 @@ Found 2 input(s)
 [1] case001.nii.gz | shape=(128,256,256) | spacing=(1.0,1.0,1.0)
 [2] case002.nii.gz | shape=(128,256,256) | spacing=(1.0,1.0,1.0)
 ```
+
+Note:
+- Uses metadata-only loading (fast)
+- Does NOT load full volumes
+- Does NOT run inference
 
 ### 2. Batch inference
 
@@ -91,12 +117,12 @@ results/
 - YAML-configured inference pipelines
 - Support for **NIfTI** and **DICOM** input data
 - Standardized preprocessing for volumetric medical images
-- PyTorch-based model inference
+- Modular model interface (dummy / PyTorch / MONAI / nnU-Net)
 - Segmentation mask export (NIfTI)
 - Visualization overlays (PNG)
 - Batch inference support
 - Reproducible pipeline configuration
-- Dry-run input inspection
+- Fast dry-run input inspection (metadata-only)
 
 ## Example Configuration
 
@@ -110,6 +136,7 @@ output:
   dir: ./results
   save_mask: true
   save_overlay: true
+  overlay_slices: ["center"]
 
 preprocess:
   orientation: RAS

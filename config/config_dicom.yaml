@@ -6,6 +6,7 @@ output:
   dir: ./results
   save_mask: true
   save_overlay: true
+  overlay_slices: ["center"]
 
 preprocess:
   orientation: RAS

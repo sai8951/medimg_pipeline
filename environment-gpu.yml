@@ -1,4 +1,4 @@
-name: med-pipe-gpu
+name: med-pipe
 
 channels:
   - pytorch

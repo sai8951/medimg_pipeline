@@ -19,8 +19,10 @@ def run(config_path: str) -> None:
     typer.echo(f"Pipeline completed. Processed {len(summaries)} case(s).")
     for summary in summaries:
         typer.echo(
-            f"- {summary['case_id']} | shape={summary['shape']} | "
-            f"spacing={summary['spacing']} | mask_voxels={summary['mask_voxels']}"
+            f"- {summary['case_id']} | "
+            f"shape={summary['shape']} | "
+            f"spacing={summary['spacing']} | "
+            f"mask_voxels={summary['mask_voxels']}"
         )
 
 
@@ -30,7 +32,7 @@ def validate(config_path: str) -> None:
     try:
         _ = load_config(config_path)
         typer.echo("Config is valid.")
-    except ValidationError as e:
+    except (ValidationError, ValueError) as e:
         typer.echo("Config validation failed.")
         typer.echo(str(e))
         raise typer.Exit(code=1)
@@ -40,6 +42,11 @@ def validate(config_path: str) -> None:
 def dry_run(config_path: str) -> None:
     """Inspect inputs and configuration without running inference."""
     config = load_config(config_path)
+
+    typer.echo("Inspecting inputs...")
+    typer.echo("Note: current dry-run loads full volumes to inspect shape/spacing.")
+    typer.echo("")
+
     rows = inspect_inputs(config)
 
     typer.echo(f"Found {len(rows)} input(s).")
@@ -63,10 +70,16 @@ def dry_run(config_path: str) -> None:
     typer.echo(f"- device: {config.model.device}")
 
     typer.echo("")
+    typer.echo("Inference")
+    typer.echo(f"- mode: {config.inference.mode}")
+    typer.echo(f"- batch_size: {config.inference.batch_size}")
+
+    typer.echo("")
     typer.echo("Output")
     typer.echo(f"- dir: {config.output.dir}")
     typer.echo(f"- save_mask: {config.output.save_mask}")
     typer.echo(f"- save_overlay: {config.output.save_overlay}")
+    typer.echo(f"- overlay_slices: {config.output.overlay_slices}")
 
     typer.echo("")
     typer.echo("Export")
@@ -87,6 +100,7 @@ def example_config(input_type: str = "nifti") -> None:
                 "dir": "./results",
                 "save_mask": True,
                 "save_overlay": True,
+                "overlay_slices": ["center"],
             },
             "preprocess": {
                 "orientation": "RAS",
@@ -123,10 +137,12 @@ def example_config(input_type: str = "nifti") -> None:
                 "dir": "./results",
                 "save_mask": True,
                 "save_overlay": True,
+                "overlay_slices": ["center"],
             },
             "preprocess": {
                 "orientation": "RAS",
                 "resample_spacing": [1.0, 1.0, 1.0],
+                "intensity_clip": None,
                 "normalize": "zscore",
             },
             "model": {
