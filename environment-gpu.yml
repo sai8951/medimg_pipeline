@@ -1,4 +1,4 @@
-name: med-pipe-gpu
+name: med-pipe
 
 channels:
   - pytorch
@@ -13,6 +13,7 @@ dependencies:
   - pandas
   - matplotlib
 
+  - pydicom
   - nibabel
   - simpleitk
 

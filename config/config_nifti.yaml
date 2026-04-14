@@ -1,12 +1,13 @@
 input:
   type: nifti
-  path: ./data
+  path: ./data/nifti_dummy
   pattern: "*.nii.gz"
 
 output:
-  dir: ./results
+  dir: ./results/res_nifti
   save_mask: true
   save_overlay: true
+  overlay_slices: ["center"]
 
 preprocess:
   orientation: RAS
@@ -14,7 +15,7 @@ preprocess:
   normalize: zscore
 
 model:
-  type: dummy # pytorch
+  type: dummy # dummy, pytorch, monai, nnunet
   weights: null # ./weights/model.pt
   device: auto  # cpu, cuda, mps, auto
 

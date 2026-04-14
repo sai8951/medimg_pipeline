@@ -6,9 +6,11 @@ import numpy as np
 
 from medimg_pipeline.config import PipelineConfig
 from medimg_pipeline.core.exceptions import UnsupportedInputError
+from medimg_pipeline.io.peek import peek_nifti, peek_dicom
 from medimg_pipeline.io.dicom import load_dicom_series
 from medimg_pipeline.io.nifti import load_nifti
 from medimg_pipeline.io.writers import ensure_output_dir, write_mask_nifti, write_summary_csv
+from medimg_pipeline.models.dummy import DummyInferencer
 from medimg_pipeline.models.monai import MonaiInferencer
 from medimg_pipeline.models.nnunet import NnUNetInferencer
 from medimg_pipeline.models.pytorch import PyTorchInferencer
@@ -25,12 +27,12 @@ def collect_inputs(config: PipelineConfig) -> list[Path]:
     Collect input targets from config.
 
     NIfTI:
-      - if path is a file -> single case
-      - if path is a directory -> collect by glob pattern
+    - if path is a file -> single case
+    - if path is a directory -> collect by glob pattern
 
     DICOM:
-      - if path is a directory with subdirectories -> each subdirectory is treated as one case
-      - if path has no subdirectories -> path itself is treated as one case
+    - if path is a directory with subdirectories -> each subdirectory is treated as one case
+    - if path has no subdirectories -> path itself is treated as one case
     """
     path = Path(config.input.path)
 
@@ -61,18 +63,25 @@ def collect_inputs(config: PipelineConfig) -> list[Path]:
 def _load_single_input(input_path: Path, input_type: str):
     if input_type == "nifti":
         return load_nifti(input_path)
+
     if input_type == "dicom":
         return load_dicom_series(input_path)
+
     raise UnsupportedInputError(f"Unsupported input type: {input_type}")
 
 
 def _build_inferencer(config: PipelineConfig):
     model_type = config.model.type
 
-    if model_type in {"dummy", "pytorch"}:
+    if model_type == "dummy":
+        return DummyInferencer()
+
+    if model_type == "pytorch":
         return PyTorchInferencer(weights=config.model.weights, device=config.model.device)
+
     if model_type == "monai":
         return MonaiInferencer(weights=config.model.weights, device=config.model.device)
+
     if model_type == "nnunet":
         return NnUNetInferencer(weights=config.model.weights, device=config.model.device)
 
@@ -99,25 +108,36 @@ def _case_id_from_input_path(input_path: Path, input_type: str) -> str:
 
 
 def inspect_inputs(config: PipelineConfig) -> list[dict]:
-    """
-    Used by dry-run: inspect input files/directories without running inference.
-    """
     inputs = collect_inputs(config)
     rows: list[dict] = []
 
     for input_path in inputs:
-        volume = _load_single_input(input_path, config.input.type)
+        if config.input.type == "nifti":
+            meta = peek_nifti(input_path)
+        else:
+            meta = peek_dicom(input_path)
+
         rows.append(
             {
                 "case_id": _case_id_from_input_path(input_path, config.input.type),
                 "input_path": str(input_path),
-                "source_type": volume.source_type,
-                "shape": str(volume.shape),
-                "spacing": str(volume.spacing),
+                "shape": str(meta["shape"]),
+                "spacing": str(meta["spacing"]),
             }
         )
 
     return rows
+
+
+def _save_overlay(volume, mask, case_id: str, output_dir: Path, config: PipelineConfig) -> str:
+    overlay_path = ""
+
+    if "center" in config.output.overlay_slices:
+        overlay_file = output_dir / f"{case_id}_overlay_center.png"
+        save_center_overlay_png(volume, mask, overlay_file)
+        overlay_path = str(overlay_file)
+
+    return overlay_path
 
 
 def run_single_case(input_path: Path, config: PipelineConfig, output_dir: Path, inferencer) -> dict:
@@ -126,8 +146,8 @@ def run_single_case(input_path: Path, config: PipelineConfig, output_dir: Path, 
     """
     volume = _load_single_input(input_path, config.input.type)
     volume = _preprocess_volume(volume, config)
-
     prediction = inferencer.predict(volume)
+
     mask = apply_threshold(prediction, config.postprocess.threshold)
 
     if config.postprocess.keep_largest_component:
@@ -136,15 +156,14 @@ def run_single_case(input_path: Path, config: PipelineConfig, output_dir: Path, 
     case_id = _case_id_from_input_path(input_path, config.input.type)
 
     mask_path = None
-    overlay_path = None
+    overlay_path = ""
 
     if config.output.save_mask:
         mask_path = output_dir / f"{case_id}_mask.nii.gz"
         write_mask_nifti(mask, reference=volume, out_path=mask_path)
 
     if config.output.save_overlay:
-        overlay_path = output_dir / f"{case_id}_overlay.png"
-        save_center_overlay_png(volume, mask, overlay_path)
+        overlay_path = _save_overlay(volume, mask, case_id, output_dir, config)
 
     summary = {
         "case_id": case_id,
@@ -154,7 +173,7 @@ def run_single_case(input_path: Path, config: PipelineConfig, output_dir: Path, 
         "spacing": str(volume.spacing),
         "mask_voxels": int(np.sum(mask)),
         "mask_path": str(mask_path) if mask_path else "",
-        "overlay_path": str(overlay_path) if overlay_path else "",
+        "overlay_path": overlay_path,
     }
     return summary
 
@@ -162,6 +181,7 @@ def run_single_case(input_path: Path, config: PipelineConfig, output_dir: Path, 
 def run_pipeline(config: PipelineConfig) -> list[dict]:
     """
     Run the pipeline for all collected inputs.
+
     Returns a list of per-case summaries.
     """
     inputs = collect_inputs(config)
