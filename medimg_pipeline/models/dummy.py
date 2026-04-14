@@ -8,31 +8,32 @@ class DummyInferencer:
     Simple deterministic inferencer for testing.
 
     Strategy:
-    - Uses intensity thresholding as a fake "model"
-    - Produces stable outputs for debugging pipeline
+    - Uses normalized voxel intensity as a fake prediction
+    - Produces stable outputs for debugging pipeline behavior
     """
 
     def __init__(self, weights=None, device: str = "cpu"):
-        # weights / device are ignored but kept for interface compatibility
+        # weights / device are ignored for now, but kept for interface compatibility
         self.device = device
 
-    def predict(self, volume):
+    def predict(self, volume) -> np.ndarray:
         """
         Args:
-            volume: Volume object with `.data` attribute (numpy array)
+            volume:
+                VolumeData-like object with `.array` attribute
 
         Returns:
-            np.ndarray (float32) same shape as input
+            np.ndarray:
+                float32 prediction array with the same shape as input
         """
-        data = volume.data.astype(np.float32)
+        arr = volume.array.astype(np.float32)
 
-        # normalize to [0,1] (robust)
-        if data.max() > data.min():
-            norm = (data - data.min()) / (data.max() - data.min())
+        vmin = float(arr.min())
+        vmax = float(arr.max())
+
+        if vmax > vmin:
+            pred = (arr - vmin) / (vmax - vmin)
         else:
-            norm = np.zeros_like(data)
-
-        # fake prediction: smooth-ish mask
-        pred = norm
+            pred = np.zeros_like(arr, dtype=np.float32)
 
         return pred.astype(np.float32)

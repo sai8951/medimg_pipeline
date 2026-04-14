@@ -79,9 +79,10 @@ medimg-pipeline dry-run config/config_nifti.yaml
 Example output:
 
 ```bash
-Found 2 input(s)
-[1] case001.nii.gz | shape=(128,256,256) | spacing=(1.0,1.0,1.0)
-[2] case002.nii.gz | shape=(128,256,256) | spacing=(1.0,1.0,1.0)
+Found 2 input(s).
+[1] case001 | data/nifti_dummy/case001.nii.gz | shape=(128, 128, 64) | spacing=(np.float32(1.0), np.float32(1.0), np.float32(1.0))
+[2] case002 | data/nifti_dummy/case002.nii.gz | shape=(128, 128, 64) | spacing=(np.float32(1.0), np.float32(1.0), np.float32(1.0))
+......
 ```
 
 Note:

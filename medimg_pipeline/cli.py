@@ -44,7 +44,8 @@ def dry_run(config_path: str) -> None:
     config = load_config(config_path)
 
     typer.echo("Inspecting inputs...")
-    typer.echo("Note: current dry-run loads full volumes to inspect shape/spacing.")
+    typer.echo("Note: dry-run uses metadata-only inspection when possible.")
+    typer.echo("It does NOT run inference.")
     typer.echo("")
 
     rows = inspect_inputs(config)
