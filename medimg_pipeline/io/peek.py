@@ -11,7 +11,7 @@ def peek_nifti(path: Path):
 
     return {
         "shape": img.shape,
-        "spacing": img.header.get_zooms()[:3],
+        "spacing": tuple(float(x) for x in img.header.get_zooms()[:3]),
     }
 
 

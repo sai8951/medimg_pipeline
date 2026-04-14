@@ -8,6 +8,18 @@ Supports **NIfTI** and **DICOM** inputs with standardized preprocessing, model i
 
 ---
 
+## Status
+
+As of 2026-04-14
+- ✅ Dummy inference pipeline (end-to-end)
+- ✅ NIfTI support
+- ✅ DICOM series support
+- 🚧 Batch robustness (continue-on-error, failure reporting)
+- 🚧 PyTorch model integration (in progress)
+- 🚧 MONAI / nnU-Net support (planned)
+
+---
+
 ## Why medimg-pipeline?
 
 Existing tools are often:
@@ -60,7 +72,7 @@ Create environment
 ```bash
 git clone git@github.com:sai8951/medimg-pipeline.git
 cd medimg-pipeline
-conda env create -f environment.yml # choose environment.yml, environment-gpu.yml, or environment-macos.yml
+conda env create -f environment.yml # or environment-gpu.yml / environment-macos.yml
 conda activate med-pipe
 pip install -e .
 ```
@@ -110,6 +122,8 @@ Output:
 results/
     case001_mask.nii.gz
     case002_mask.nii.gz
+    case001_overlay_center.png
+    case002_overlay_center.png
     summary.csv
 ```
 
@@ -167,8 +181,7 @@ export:
 - **NIfTI** (`.nii`, `.nii.gz`)
 - **DICOM series**
 
-DICOM directories containing a single imaging series are supported.  
-Multi-series directories can be handled via configuration options.
+DICOM directories containing a single imaging series are supported.
 
 ## Outputs
 
